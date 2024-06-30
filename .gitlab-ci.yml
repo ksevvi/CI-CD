@@ -1,0 +1,46 @@
+stages:
+  - build
+  - style
+  - integration
+  - deployment
+  - notify
+
+build-job:
+  stage: build
+  script:
+    - cd src/C3_SimpleBashUtils/src/cat
+    - make
+    - cd ../grep
+    - make
+  artifacts:
+    paths:
+      - src/C3_SimpleBashUtils/src/cat/s21_cat
+      - src/C3_SimpleBashUtils/src/grep/s21_grep
+    expire_in: 30 days
+
+check-style:
+  stage: style
+  script:
+    - cd src/
+    - bash style_test.sh
+
+integration-test:
+  stage: integration
+  script:
+    - cd src/
+    - bash integration_test.sh
+
+deployment:
+  stage: deployment
+  when: manual
+  script:
+    - cd src/
+    - bash deployment.sh
+    - bash notify.sh "SUCCESS"
+
+notify-error:
+  stage: notify
+  when: on_failure
+  script:
+    - cd src/
+    - bash notify.sh "FAILURE"
